@@ -1,15 +1,23 @@
-﻿# stage que contém ffmpeg (alpine-based)
-FROM jrottenberg/ffmpeg:6.0-alpine AS ffmpeg
+﻿# Dockerfile: n8n + ffmpeg (base Debian via Node official image)
+FROM node:18-bullseye-slim
 
-# sua imagem base (n8n)
-FROM n8nio/n8n:latest
+# criar usuário não-root (opcional, mas recomendado)
+RUN useradd -m -u 1000 n8n
 
 USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg ca-certificates curl \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# copia os binários e libs do ffmpeg (cobre /usr/bin, /usr/lib)
-COPY --from=ffmpeg /usr/bin /usr/bin
-COPY --from=ffmpeg /usr/lib /usr/lib
+# instala n8n globalmente (versão estável)
+RUN npm install -g n8n
 
-RUN chmod +x /usr/bin/ffmpeg /usr/bin/ffprobe || true
+# use usuário não-root
+USER n8n
+WORKDIR /home/n8n
 
-USER node
+EXPOSE 5678
+
+# Comando padrão para iniciar n8n (ajuste flags/variáveis se precisar)
+CMD ["n8n", "start"]
