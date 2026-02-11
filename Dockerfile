@@ -1,23 +1,23 @@
-﻿# Dockerfile: n8n + ffmpeg (base Debian via Node official image)
+﻿# Dockerfile final: Node (Debian) + ffmpeg + n8n (instalado via npm)
 FROM node:18-bullseye-slim
 
-# criar usuário não-root (opcional, mas recomendado)
-RUN useradd -m -u 1000 n8n
-
 USER root
+
+# instalar ffmpeg e dependências mínimas
 RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg ca-certificates curl \
+ && apt-get install -y --no-install-recommends ffmpeg ca-certificates curl build-essential \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# instala n8n globalmente (versão estável)
+# instalar n8n globalmente
 RUN npm install -g n8n
 
-# use usuário não-root
-USER n8n
-WORKDIR /home/n8n
+# usar usuário 'node' (já existe na imagem)
+USER node
+WORKDIR /home/node
 
+# expor porta padrão do n8n
 EXPOSE 5678
 
-# Comando padrão para iniciar n8n (ajuste flags/variáveis se precisar)
+# start padrão do n8n
 CMD ["n8n", "start"]
