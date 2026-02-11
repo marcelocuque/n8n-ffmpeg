@@ -1,5 +1,4 @@
-﻿# Dockerfile final: Node (Debian) + ffmpeg + n8n (instalado via npm)
-FROM node:18-bullseye-slim
+﻿FROM node:18-bullseye-slim
 
 USER root
 
@@ -19,5 +18,5 @@ WORKDIR /home/node
 # expor porta padrão do n8n
 EXPOSE 5678
 
-# start padrão do n8n
-CMD ["n8n", "start"]
+# start padrão do n8n (note: somente "n8n")
+CMD ["n8n"]
