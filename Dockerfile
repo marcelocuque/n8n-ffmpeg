@@ -1,4 +1,4 @@
-FROM n8nio/n8n:latest-bookworm
+FROM n8nio/n8n:latest
 
 USER root
 
