@@ -28,6 +28,3 @@ WORKDIR /home/node
 
 # NOTA: não definimos CMD/ENTRYPOINT aqui — usamos o entrypoint da imagem oficial
 EXPOSE 5678
-
-# start usando a variável PORT que você definirá no Render
-CMD ["sh", "-lc", "n8n start --port $PORT"]
