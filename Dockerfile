@@ -18,11 +18,9 @@ USER root
 COPY --from=downloader /tmp/ffmpeg-*-amd64-static/ffmpeg /usr/local/bin/ffmpeg
 COPY --from=downloader /tmp/ffmpeg-*-amd64-static/ffprobe /usr/local/bin/ffprobe
 
-# garante permissão e cria symlinks comuns, e imprime a versão (DEBUG)
+# garante permissão e cria symlinks comuns
 RUN chmod +x /usr/local/bin/ffmpeg /usr/local/bin/ffprobe \
  && ln -sf /usr/local/bin/ffmpeg /usr/bin/ffmpeg || true \
- && ln -sf /usr/local/bin/ffprobe /usr/bin/ffprobe || true \
- && echo '--- ffmpeg version check ---' \
- && /usr/local/bin/ffmpeg -version || true
+ && ln -sf /usr/local/bin/ffprobe /usr/bin/ffprobe || true
 
 USER node
