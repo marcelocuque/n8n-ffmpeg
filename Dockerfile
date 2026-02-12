@@ -1,23 +1,32 @@
-﻿# Dockerfile recomendado (rápido e confiável)
-FROM node:18-bullseye-slim
+﻿# multi-stage: baixar release estático do ffmpeg e copiar para a imagem oficial do n8n
+FROM debian:bookworm-slim AS downloader
+
+# ferramentas para baixar e extrair o ffmpeg estático
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates xz-utils \
+ && rm -rf /var/lib/apt/lists/*
+
+# baixar e extrair o ffmpeg estático (johnvansickle builds)
+RUN curl -L -o /tmp/ffmpeg.tar.xz "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz" \
+ && tar -xJf /tmp/ffmpeg.tar.xz -C /tmp
+
+# imagem final: imagem oficial do n8n
+FROM n8nio/n8n:latest
 
 USER root
 
-# instalar ffmpeg e dependências mínimas
-RUN apt-get update \
- && apt-get install -y --no-install-recommends ffmpeg ca-certificates curl \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+# copia apenas os binários ffmpeg e ffprobe do estágio downloader
+# o padrão do tar cria uma pasta com nome ffmpeg-*-amd64-static
+COPY --from=downloader /tmp/ffmpeg-*-amd64-static/ffmpeg /usr/local/bin/ffmpeg
+COPY --from=downloader /tmp/ffmpeg-*-amd64-static/ffprobe /usr/local/bin/ffprobe
 
-# instalar n8n globalmente
-RUN npm install -g n8n
+RUN chmod +x /usr/local/bin/ffmpeg /usr/local/bin/ffprobe || true
 
-# usar usuário 'node' (já existe na imagem)
+# voltar para o usuário padrão (imagem oficial usa 'node' ou outro)
 USER node
 WORKDIR /home/node
 
-# expor porta padrão do n8n
 EXPOSE 5678
 
-# comando correto para iniciar n8n (não usar "start")
+# comando correto para iniciar n8n
 CMD ["n8n"]
