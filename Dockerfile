@@ -1,20 +1,23 @@
-﻿# Multi-stage: pega ffmpeg de imagem ubuntu-based (glibc) e copia para a imagem oficial do n8n
-FROM jrottenberg/ffmpeg:6.0-ubuntu AS ffmpeg
-
-FROM n8nio/n8n:latest
+﻿# Dockerfile recomendado (rápido e confiável)
+FROM node:18-bullseye-slim
 
 USER root
 
-# copia somente os binários (e torná-los executáveis)
-COPY --from=ffmpeg /usr/bin/ffmpeg /usr/bin/ffmpeg
-COPY --from=ffmpeg /usr/bin/ffprobe /usr/bin/ffprobe
-RUN chmod +x /usr/bin/ffmpeg /usr/bin/ffprobe || true
+# instalar ffmpeg e dependências mínimas
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg ca-certificates curl \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# voltar para usuário padrão da imagem n8n
+# instalar n8n globalmente
+RUN npm install -g n8n
+
+# usar usuário 'node' (já existe na imagem)
 USER node
 WORKDIR /home/node
 
+# expor porta padrão do n8n
 EXPOSE 5678
 
-# iniciar n8n via CLI correto
+# comando correto para iniciar n8n (não usar "start")
 CMD ["n8n"]
