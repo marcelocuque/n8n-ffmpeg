@@ -23,10 +23,12 @@ RUN chmod +x /usr/local/bin/ffmpeg /usr/local/bin/ffprobe \
  && ln -sf /usr/local/bin/ffmpeg /usr/bin/ffmpeg || true \
  && ln -sf /usr/local/bin/ffprobe /usr/bin/ffprobe || true
 
+# cria a pasta onde o n8n vai salvar arquivos e entrega para o usuário node
+RUN mkdir -p /tmp/youtubevideos \
+ && chown -R node:node /tmp/youtubevideos \
+ && chmod -R 755 /tmp/youtubevideos
+
 USER node
 
+# Verificação (rodará como usuário node)
 RUN if [ -x /usr/local/bin/ffmpeg ]; then echo '--- ffmpeg via /usr/local/bin/ffmpeg ---' && /usr/local/bin/ffmpeg -version || true; elif command -v ffmpeg >/dev/null 2>&1; then echo '--- ffmpeg no PATH ---' && ffmpeg -version || true; else echo '--- ffmpeg NÃO ENCONTRADO ---'; fi
-
-
-RUN if [ -x /usr/local/bin/ffmpeg ]; then echo '--- ffmpeg via /usr/local/bin/ffmpeg ---' && /usr/local/bin/ffmpeg -version || true; elif command -v ffmpeg >/dev/null 2>&1; then echo '--- ffmpeg no PATH ---' && ffmpeg -version || true; else echo '--- ffmpeg NÃO ENCONTRADO ---'; fi
-
